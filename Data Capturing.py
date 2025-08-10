@@ -84,6 +84,8 @@ else:
         frame = cv.flip(frame, 1)
         handsInfo, frame = detector.findHands(frame)
 
+        key = cv.waitKeyEx(1)
+
         if handsInfo:
             hand = handsInfo[0]
             hand_img = caputureHandImg(frame, hand['bbox'], OFFSET, BACKGROUND_SIZE)
@@ -91,14 +93,24 @@ else:
             if hand_img is not None:
                 cv.imshow('Hand Img', hand_img)
 
-            key = cv.waitKey(1)
+            # key = cv.waitKey(1)
 
             if key == ord('s'):
                 count = counter_dict[CATEGORIES[pointer]]
-                cv.imwrite(f'{folder}/Image_{count}.jpg', hand_img)
-                counter_dict[CATEGORIES[pointer]] += 1  # Update this folder's counter
+                
+                if CATEGORIES[pointer] == 'NEGATIVE':
+                    max_limit = MAX_NEGATIVE_IMAGES
+                else:
+                    max_limit = MAX_IMAGES
+                
+                if count < max_limit:
+                    cv.imwrite(f'{folder}/Image_{count}.jpg', hand_img)
+                    counter_dict[CATEGORIES[pointer]] += 1
+                    print(f"[SAVED] {folder}/Image_{count}.jpg")
+                else:
+                    print(f"[INFO] Max images reached for {CATEGORIES[pointer]} ({max_limit}).")
 
-        key = cv.waitKeyEx(1)
+        # key = cv.waitKeyEx(1)
 
         if key == KEY_CODES['UP']:  # UP
             pointer = (pointer - 10) % len(CATEGORIES)
